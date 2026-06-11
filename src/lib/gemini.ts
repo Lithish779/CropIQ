@@ -21,9 +21,9 @@ export async function analyzeImageWithGemini(
     const result = await geminiVisionModel.generateContent([prompt, imagePart]);
     const response = await result.response;
     return response.text();
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini vision error:", error);
-    throw new Error("Failed to analyze image with Gemini");
+    throw new Error(`Failed to analyze image with Gemini: ${error?.message || error}`);
   }
 }
 
@@ -55,8 +55,8 @@ export async function chatWithGemini(
     const result = await geminiModel.generateContent(fullPrompt);
     const response = await result.response;
     return response.text();
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini chat error:", error);
-    throw new Error("Failed to get response from Gemini");
+    throw new Error(`Failed to get response from Gemini: ${error?.message || error}`);
   }
 }

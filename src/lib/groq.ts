@@ -38,9 +38,9 @@ export async function fastAnalysisWithGroq(
     });
 
     return completion.choices[0]?.message?.content || "No response generated";
-  } catch (error) {
+  } catch (error: any) {
     console.error("Groq error:", error);
-    throw new Error("Failed to get response from Groq");
+    throw new Error(`Failed to get response from Groq: ${error?.message || error}`);
   }
 }
 
@@ -67,8 +67,8 @@ export async function streamGroqResponse(
       const text = chunk.choices[0]?.delta?.content || "";
       if (text) onChunk(text);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Groq stream error:", error);
-    throw new Error("Streaming failed");
+    throw new Error(`Streaming failed: ${error?.message || error}`);
   }
 }
