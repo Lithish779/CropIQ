@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IAnalysis extends Document {
-  _id: string;
+  _id: any;
   userId: string;
   type: "crop_disease" | "pest" | "soil" | "weather" | "waste" | "general";
   imageUrl?: string;

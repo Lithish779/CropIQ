@@ -145,5 +145,5 @@ function extractTags(query: string, cropName: string, type: string): string[] {
   keywords.forEach((kw) => {
     if (query.toLowerCase().includes(kw)) tags.push(kw);
   });
-  return [...new Set(tags)];
+  return Array.from(new Set(tags));
 }

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+
+export const dynamic = "force-dynamic";
 import { authOptions } from "@/lib/auth-options";
 import connectDB from "@/lib/mongodb";
 import Analysis from "@/models/Analysis";
@@ -66,7 +68,7 @@ export async function GET(request: NextRequest) {
         totalAnalyses,
         criticalIssues,
         resolvedIssues,
-        analysisCount: user?.analysisCount || 0,
+        analysisCount: (user as any)?.analysisCount || 0,
       },
       charts: {
         byType: Object.entries(byType).map(([name, value]) => ({
