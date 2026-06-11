@@ -68,6 +68,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facingMode]);
 
   const toggleCamera = () => {

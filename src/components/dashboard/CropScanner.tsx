@@ -180,7 +180,7 @@ export function CropScanner() {
 
         {/* Description */}
         <div className="mb-6">
-          <label className="label">Describe what you're seeing</label>
+          <label className="label">Describe what you&apos;re seeing</label>
           <textarea
             value={query}
             onChange={(e) => setQuery(e.target.value)}
