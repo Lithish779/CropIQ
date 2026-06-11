@@ -35,10 +35,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ response, provider });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Chat error:", error);
     return NextResponse.json(
-      { error: "Failed to get AI response" },
+      { error: `Chat failed: ${error?.message || error}` },
       { status: 500 }
     );
   }

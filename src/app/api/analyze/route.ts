@@ -94,10 +94,10 @@ Please structure your response clearly with these sections.`;
       },
       aiProvider,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Analyze error:", error);
     return NextResponse.json(
-      { error: "Analysis failed. Please try again." },
+      { error: `Analysis failed: ${error?.message || error}` },
       { status: 500 }
     );
   }
