@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Loader2, Leaf, Bug, Droplets, Trash2, CloudRain } from "lucide-react";
+import { Sparkles, Loader2, Leaf, Bug, Droplets, Trash2, CloudRain, Camera, Upload } from "lucide-react";
 import toast from "react-hot-toast";
 import { ImageDropzone } from "./ImageDropzone";
+import { CameraCapture } from "./CameraCapture";
 import { AnalysisResultCard } from "./AnalysisResultCard";
 import { cn } from "@/lib/auth";
 
@@ -24,6 +25,7 @@ export function CropScanner() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [aiProvider, setAiProvider] = useState<string>("");
+  const [scanMode, setScanMode] = useState<"upload" | "camera">("upload");
 
   const handleImageSelect = (selectedFile: File) => {
     setFile(selectedFile);
@@ -106,14 +108,62 @@ export function CropScanner() {
           </div>
         </div>
 
-        {/* Image upload */}
+        {/* Image upload / Camera Capture */}
         <div className="mb-6">
-          <label className="label">Upload a photo (optional but recommended)</label>
-          <ImageDropzone
-            onImageSelect={handleImageSelect}
-            preview={preview}
-            onRemove={handleRemoveImage}
-          />
+          <label className="label">Photo (optional but recommended)</label>
+
+          {!preview && (
+            <div className="flex gap-2 mb-4 bg-white/5 p-1 rounded-xl w-fit">
+              <button
+                type="button"
+                onClick={() => setScanMode("upload")}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                  scanMode === "upload"
+                    ? "bg-forest-500 text-white shadow-md"
+                    : "text-white/60 hover:text-white"
+                )}
+              >
+                <Upload className="w-4 h-4" />
+                Upload Photo
+              </button>
+              <button
+                type="button"
+                onClick={() => setScanMode("camera")}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                  scanMode === "camera"
+                    ? "bg-forest-500 text-white shadow-md"
+                    : "text-white/60 hover:text-white"
+                )}
+              >
+                <Camera className="w-4 h-4" />
+                Take Photo
+              </button>
+            </div>
+          )}
+
+          {preview ? (
+            <ImageDropzone
+              onImageSelect={handleImageSelect}
+              preview={preview}
+              onRemove={handleRemoveImage}
+            />
+          ) : scanMode === "camera" ? (
+            <CameraCapture
+              onCapture={(capturedFile) => {
+                handleImageSelect(capturedFile);
+                setScanMode("upload");
+              }}
+              onCancel={() => setScanMode("upload")}
+            />
+          ) : (
+            <ImageDropzone
+              onImageSelect={handleImageSelect}
+              preview={preview}
+              onRemove={handleRemoveImage}
+            />
+          )}
         </div>
 
         {/* Crop name */}
