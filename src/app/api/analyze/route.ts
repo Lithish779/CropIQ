@@ -104,32 +104,66 @@ Please structure your response clearly with these sections.`;
 }
 
 function parseAIResponse(response: string) {
-  const diagnosisMatch =
-    response.match(/DIAGNOSIS[:\s]*([^\n]+(?:\n(?!SEVERITY|CONFIDENCE)[^\n]+)*)/i) ||
-    response.match(/diagnosis[:\s]*([^\n]+)/i);
+  // Find all matches with their index in the string
+  const regex = /(?:^|\n)[#\*\s\-\d\.]*(DIAGNOSIS|SEVERITY|CONFIDENCE|AFFECTED AREA|TREATMENT|PREVENTION|EXPERT ADVICE|EXPERT|CONSULT)[:\s\*\-]*/gi;
   
-  const severityMatch =
-    response.match(/SEVERITY[:\s]*(critical|high|medium|low|healthy)/i);
-  
-  const confidenceMatch =
-    response.match(/CONFIDENCE[:\s]*(\d+)/i);
-  
-  const treatmentMatch =
-    response.match(/TREATMENT[:\s]*([^\n]+(?:\n(?!PREVENTION|EXPERT)[^\n]+)*)/i);
-  
-  const preventionMatch =
-    response.match(/PREVENTION[:\s]*([^\n]+(?:\n(?!EXPERT|DIAGNOSIS)[^\n]+)*)/i);
-  
-  const expertMatch =
-    response.match(/EXPERT[^:]*[:\s]*([^\n]+(?:\n(?!DIAGNOSIS|SEVERITY)[^\n]+)*)/i);
+  const matches: { name: string; index: number; endIndex: number }[] = [];
+  let match;
+  while ((match = regex.exec(response)) !== null) {
+    matches.push({
+      name: match[1].toUpperCase(),
+      index: match.index,
+      endIndex: regex.lastIndex
+    });
+  }
+
+  // Helper to extract content between a match and the next match
+  function getContentForSection(sectionNames: string[]) {
+    const found = matches.find(m => sectionNames.includes(m.name));
+    if (!found) return null;
+    
+    // Find the next match that starts after this one
+    let nextMatch = null;
+    for (const m of matches) {
+      if (m.index > found.index) {
+        nextMatch = m;
+        break;
+      }
+    }
+    
+    const start = found.endIndex;
+    const end = nextMatch ? nextMatch.index : response.length;
+    return response.substring(start, end).trim();
+  }
+
+  const diagnosis = getContentForSection(["DIAGNOSIS"]);
+  const severityStr = getContentForSection(["SEVERITY"]);
+  const confidenceStr = getContentForSection(["CONFIDENCE"]);
+  const treatment = getContentForSection(["TREATMENT"]);
+  const prevention = getContentForSection(["PREVENTION"]);
+  const expertAdvice = getContentForSection(["EXPERT ADVICE", "EXPERT", "CONSULT"]);
+
+  // Extract severity value
+  let severity: "critical" | "high" | "medium" | "low" | "healthy" = "medium";
+  if (severityStr) {
+    const sevMatch = severityStr.match(/(critical|high|medium|low|healthy)/i);
+    if (sevMatch) severity = sevMatch[1].toLowerCase() as any;
+  }
+
+  // Extract confidence value
+  let confidence = 75;
+  if (confidenceStr) {
+    const confMatch = confidenceStr.match(/(\d+)/);
+    if (confMatch) confidence = parseInt(confMatch[1]);
+  }
 
   return {
-    diagnosis: diagnosisMatch?.[1]?.trim() || extractFirstMeaningfulParagraph(response),
-    severity: (severityMatch?.[1]?.toLowerCase() as any) || "medium",
-    confidence: confidenceMatch ? parseInt(confidenceMatch[1]) : 75,
-    treatment: treatmentMatch?.[1]?.trim() || "Please consult the full analysis below.",
-    prevention: preventionMatch?.[1]?.trim() || "Follow standard agricultural best practices.",
-    expertAdvice: expertMatch?.[1]?.trim() || undefined,
+    diagnosis: diagnosis || extractFirstMeaningfulParagraph(response),
+    severity,
+    confidence,
+    treatment: treatment || "Please consult the full analysis below.",
+    prevention: prevention || "Follow standard agricultural best practices.",
+    expertAdvice: expertAdvice || undefined,
   };
 }
 

@@ -1,9 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const rawKey = process.env.GEMINI_API_KEY || "";
+const cleanKey = rawKey.replace(/^["']|["']$/g, "");
+const genAI = new GoogleGenerativeAI(cleanKey);
 
-export const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-export const geminiVisionModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+export const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+export const geminiVisionModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 export async function analyzeImageWithGemini(
   imageBase64: string,
